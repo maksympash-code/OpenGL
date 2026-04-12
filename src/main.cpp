@@ -33,16 +33,18 @@ int main()
         return -1;
     }
 
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
 
     auto vertexShaderCode = R"(
         #version 330 core
 
-        layout(location = 0) in vec4 aPos;
+        layout(location = 0) in vec2 aPos;
+        out vec4 color;
 
         void main() {
-            // gl_Position = vec4(aPos, 1.0);
-            gl_Position = aPos;
+            color = vec4(1.0, 1.0, 1.0, 1.0);
+            gl_Position = vec4(aPos, 0.0, 1.0);
+            // gl_Position = aPos;
         }
     )";
 
@@ -52,10 +54,13 @@ int main()
 
     auto fragmentShaderCode = R"(
         #version 330 core
-        out vec4 FragColor;
+
+        in vec4 color;
+        out vec4 FragColor; // колір фрагменту
 
         void main() {
-            FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            // FragColor = vec4(1.0, 0.0, 0.0, 1.0); // червоний
+            FragColor = color;
         }
     )";
 
@@ -75,8 +80,8 @@ int main()
 
     float vertices[] = {
         -0.5f, -0.5f,
-        0.0f, 0.5f,
         0.5f, -0.5f,
+        0.0f, 0.5f,
     };
 
     GLuint VBO; // ідентифікатор для даних - місток CPU та GPU
