@@ -33,16 +33,17 @@ int main()
         return -1;
     }
 
-    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     auto vertexShaderCode = R"(
         #version 330 core
 
         layout(location = 0) in vec2 aPos;
-        out vec4 color;
+        layout(location = 1) in vec3 aColor;
+        out vec3 color;
 
         void main() {
-            color = vec4(1.0, 1.0, 1.0, 1.0);
+            color = aColor;
             gl_Position = vec4(aPos, 0.0, 1.0);
             // gl_Position = aPos;
         }
@@ -55,12 +56,12 @@ int main()
     auto fragmentShaderCode = R"(
         #version 330 core
 
-        in vec4 color;
+        in vec3 color;
         out vec4 FragColor; // колір фрагменту
 
         void main() {
             // FragColor = vec4(1.0, 0.0, 0.0, 1.0); // червоний
-            FragColor = color;
+            FragColor = vec4(color, 1.0);
         }
     )";
 
@@ -79,9 +80,15 @@ int main()
     glDeleteShader(fragmentShader);
 
     float vertices[] = {
-        -0.5f, -0.5f,
-        0.5f, -0.5f,
-        0.0f, 0.5f,
+        // first triangle
+        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+
+        // second triangle
+        0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
     };
 
     GLuint VBO; // ідентифікатор для даних - місток CPU та GPU
@@ -95,15 +102,28 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind = activate
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // position attribute
     glVertexAttribPointer(
         0,                          // location = 0
         2,                          // 2 компоненти: x, y
         GL_FLOAT,                   // тип даних
         GL_FALSE,                   // не нормалізувати
-        2 * sizeof(float),          // stride: 2 float-a на вершину
+        5 * sizeof(float),          // stride: 2 float-a на вершину
         (void*)0                    // offset: починаємо з 0
         );
     glEnableVertexAttribArray(0);
+
+    // color attribute
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        5 * sizeof(float),
+        (void*)(2 * sizeof(float))
+        );
+    glEnableVertexAttribArray(1);
+
     glBindVertexArray(0); // деактивувати VAO
 
     /* Loop until the user closes the window */
@@ -114,7 +134,7 @@ int main()
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
