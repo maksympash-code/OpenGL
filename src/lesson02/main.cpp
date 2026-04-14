@@ -37,56 +37,11 @@ int main()
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-//     auto vertexShaderCode = R"(
-//         #version 330 core
-//
-//         layout(location = 0) in vec2 aPos;
-//         layout(location = 1) in vec3 aColor;
-//         out vec3 color;
-//
-//         void main() {
-//             color = aColor;
-//             gl_Position = vec4(aPos, 0.0, 1.0);
-//             // gl_Position = aPos;
-//         }
-//     )";
+
     std::string vertexShaderName = "res/shaders/triangle.vert";
     std::string fragmentShaderName = "res/shaders/triangle.frag";
-    auto vertexShaderCode_str = LoadShaderFromFile(vertexShaderName);
-    auto vertexShaderCode = vertexShaderCode_str.c_str();
 
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderCode, nullptr);
-    glCompileShader(vertexShader);
-
-//     auto fragmentShaderCode = R"(
-//         #version 330 core
-//
-//         in vec3 color;
-//         out vec4 FragColor; // колір фрагменту
-//
-//         void main() {
-//             // FragColor = vec4(1.0, 0.0, 0.0, 1.0); // червоний
-//             FragColor = vec4(color, 1.0);
-//         }
-//     )";
-
-    auto fragmentShaderCode_str = LoadShaderFromFile(fragmentShaderName);
-    const char* fragmentShaderCode = fragmentShaderCode_str.c_str();
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderCode, nullptr);
-    glCompileShader(fragmentShader);
-
-
-    // Програма з шейдерів
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    GLuint shaderProgram = createProgram(vertexShaderName, fragmentShaderName);
 
     float vertices[] = {
         // first triangle
