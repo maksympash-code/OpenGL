@@ -14,9 +14,11 @@ set(libs
 
 add_subdirectory(external)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+set(LESSON_TARGET lesson01)
 
-target_link_libraries(${PROJECT_NAME} ${libs})
+add_executable(${LESSON_TARGET} src/lesson01/main.cpp)
+
+target_link_libraries(${LESSON_TARGET} ${libs})
 
 
 
