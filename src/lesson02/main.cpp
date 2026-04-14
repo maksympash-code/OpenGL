@@ -67,26 +67,28 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // position attribute
+    GLuint posAtriLocation = glGetAttribLocation(shaderProgram, "aPos");
     glVertexAttribPointer(
-        0,                          // location = 0
+        posAtriLocation,            // знайдена командою posAtriLocation позиція атрибуту у шейдері
         2,                          // 2 компоненти: x, y
         GL_FLOAT,                   // тип даних
         GL_FALSE,                   // не нормалізувати
-        5 * sizeof(float),          // stride: 2 float-a на вершину
+        5 * sizeof(float),          // stride: 5 float-a на вершину
         (void*)0                    // offset: починаємо з 0
         );
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(posAtriLocation);
 
     // color attribute
+    GLuint colorAtriLocation = glGetAttribLocation(shaderProgram, "aColor");
     glVertexAttribPointer(
-        1,
+        colorAtriLocation,
         3,
         GL_FLOAT,
         GL_FALSE,
         5 * sizeof(float),
         (void*)(2 * sizeof(float))
         );
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(colorAtriLocation);
 
     glBindVertexArray(0); // деактивувати VAO
 
