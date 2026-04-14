@@ -14,9 +14,19 @@ set(libs
 
 add_subdirectory(external)
 
+######### LESSON_1 #########
 set(LESSON_TARGET lesson01)
+set(LESSON_DIR src/${LESSON_TARGET})
 
-add_executable(${LESSON_TARGET} src/lesson01/main.cpp)
+add_executable(${LESSON_TARGET} ${LESSON_DIR}/main.cpp)
+
+target_link_libraries(${LESSON_TARGET} ${libs})
+
+######### LESSON_2 #########
+set(LESSON_TARGET lesson02)
+set(LESSON_DIR src/${LESSON_TARGET})
+
+add_executable(${LESSON_TARGET} ${LESSON_DIR}/main.cpp)
 
 target_link_libraries(${LESSON_TARGET} ${libs})
 
