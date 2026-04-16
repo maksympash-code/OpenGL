@@ -43,28 +43,44 @@ int main()
 
     GLuint shaderProgram = createProgram(vertexShaderName, fragmentShaderName);
 
-    float vertices[] = {
-        // first triangle
-        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    // float vertices[] = {
+    //     // first triangle
+    //     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+    //     0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+    //     -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    //
+    //     // second triangle
+    //     0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
+    //     0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+    //     -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    // };
 
-        // second triangle
-        0.5f, -0.5f, 1.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    float rectVertices[] {
+        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // 0
+        0.5f, -0.5f,  1.0f, 1.0f, 0.0f, // 1
+        0.5f, 0.5f,   0.0f, 0.0f, 1.0f, // 2
+        -0.5f, 0.5f,  0.0f, 0.0f, 1.0f, // 3
     };
 
-    GLuint VBO; // ідентифікатор для даних - місток CPU та GPU
+    unsigned int rectIndices[] {
+        0, 1, 2,
+        0, 2, 3,
+    };
+
+    GLuint VBO, rectIndexVBO; // ідентифікатор для даних - місток CPU та GPU
     GLuint VAO; // vertex array object
 
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &rectIndexVBO);
     glGenVertexArrays(1, &VAO);
 
     glBindVertexArray(VAO);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectIndexVBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectIndices), rectIndices, GL_STATIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind = activate
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertices), rectVertices, GL_STATIC_DRAW);
 
     // position attribute
     GLuint posAtriLocation = glGetAttribLocation(shaderProgram, "aPos");
@@ -100,7 +116,7 @@ int main()
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -110,6 +126,7 @@ int main()
     } while (!glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE));
 
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, rectIndices);
     glDeleteVertexArrays(1, &VAO);
     glDeleteProgram(shaderProgram);
 
