@@ -46,6 +46,7 @@ int main()
 
     GLint colorUniformPos = glGetUniformLocation(shaderProgram, "uColor");
     GLuint shiftUniformPos = glGetUniformLocation(shaderProgram, "uShift");
+    GLint textureUniformPos = glGetUniformLocation(shaderProgram, "uTexture");
 
     float rectVertices[] {
         /* координати */ -0.5f, -0.5f, /* текстурні координати */ 0.0f, 0.0f, // 0
@@ -99,7 +100,7 @@ int main()
 
     glBindVertexArray(0); // деактивувати VAO
 
-    unsigned int texture = loadTexture("res/textures/girl.jpg");
+    unsigned int texture = loadTexture("res/textures/house.jpg");
 
     /* Loop until the user closes the window */
     do
@@ -108,8 +109,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
-        glUniform4f(colorUniformPos, 0.0f, 0.0f, 1.0f, 1.0f);
-        glUniform4f(shiftUniformPos, 0.3f, 0.0f, 0.0f, 0.0f);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(textureUniformPos, 0);
+
         glBindVertexArray(VAO);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
