@@ -49,15 +49,34 @@ int main()
     GLint textureUniformPos = glGetUniformLocation(shaderProgram, "uTexture");
 
     float rectVertices[] {
-        /* координати */ -0.5f, -0.5f, /* текстурні координати */ 0.0f, 0.0f, // 0
-        /* координати */ 0.5f, -0.5f,  /* текстурні координати */ 1.0f, 0.0f, // 1
-        /* координати */ 0.5f, 0.5f,   /* текстурні координати */ 1.0f, 1.0f, // 2
-        /* координати */ -0.5f, 0.5f,  /* текстурні координати */ 0.0f, 1.0f, // 3
+        /* координати */ -0.9f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 0
+        /* координати */ -0.4f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 1
+        /* координати */ -0.4f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 2
+        /* координати */ -0.9f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 3
+
+        /* координати */ -0.25f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 4
+        /* координати */ 0.25f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 5
+        /* координати */ 0.25f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 6
+        /* координати */ -0.25f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 7
+
+        /* координати */ 0.4f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 8
+        /* координати */ 0.9f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 9
+        /* координати */ 0.9f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 10
+        /* координати */ 0.4f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 11
     };
 
     unsigned int rectIndices[] {
+        // rectangle 1
         0, 1, 2,
         0, 2, 3,
+
+        // rectangle 2
+        4, 5, 6,
+        4, 6, 7,
+
+        // rectangle 3
+        8, 9, 10,
+        8, 10, 11,
     };
 
     GLuint VBO, rectIndexVBO; // ідентифікатор для даних - місток CPU та GPU
@@ -100,7 +119,10 @@ int main()
 
     glBindVertexArray(0); // деактивувати VAO
 
-    unsigned int texture = loadTexture("res/textures/house.jpg");
+    unsigned int texture1 = loadTexture("res/textures/house.jpg");
+    unsigned int texture2 = loadTexture("res/textures/girl.jpg");
+    unsigned int texture3 = loadTexture("res/textures/dog.jpg");
+
 
     /* Loop until the user closes the window */
     do
@@ -111,13 +133,34 @@ int main()
         glUseProgram(shaderProgram);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(textureUniformPos, 0);
 
         glBindVertexArray(VAO);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // rect 1 with texture 1
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glDrawElements(
+            GL_TRIANGLES,
+            6,
+            GL_UNSIGNED_INT,
+            0
+            );
 
+        // rect 2 with texture 2
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        glDrawElements(GL_TRIANGLES,
+            6,
+            GL_UNSIGNED_INT,
+            (void*)(6 * sizeof(unsigned int))
+            );
+
+        // rect 3 with texture 3
+        glBindTexture(GL_TEXTURE_2D, texture3);
+        glDrawElements(GL_TRIANGLES,
+            6,
+            GL_UNSIGNED_INT,
+            (void*)(12 * sizeof(unsigned int))
+            );
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
@@ -126,10 +169,11 @@ int main()
     } while (!glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE));
 
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, rectIndices);
+    glDeleteBuffers(1, &rectIndexVBO);
     glDeleteVertexArrays(1, &VAO);
     glDeleteProgram(shaderProgram);
-    glDeleteTextures(1, &texture);
+    glDeleteTextures(1, &texture1);
+    glDeleteTextures(1, &texture2);
 
     glfwTerminate();
     return 0;
