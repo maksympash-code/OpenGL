@@ -7,6 +7,12 @@
 #include "../utils/shader_utils.h"
 #include "../utils/texture.h"
 
+#include <chrono>
+#include <thread>
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 int main()
 {
     GLFWwindow* window;
@@ -47,36 +53,18 @@ int main()
     GLint colorUniformPos = glGetUniformLocation(shaderProgram, "uColor");
     GLuint shiftUniformPos = glGetUniformLocation(shaderProgram, "uShift");
     GLint textureUniformPos = glGetUniformLocation(shaderProgram, "uTexture");
+    GLint transformUniformPos = glGetUniformLocation(shaderProgram, "uTransform");
 
     float rectVertices[] {
-        /* координати */ -0.9f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 0
-        /* координати */ -0.4f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 1
-        /* координати */ -0.4f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 2
-        /* координати */ -0.9f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 3
-
-        /* координати */ -0.25f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 4
-        /* координати */ 0.25f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 5
-        /* координати */ 0.25f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 6
-        /* координати */ -0.25f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 7
-
-        /* координати */ 0.4f, -0.4f, /* текстурні координати */ 0.0f, 0.0f, // 8
-        /* координати */ 0.9f, -0.4f,  /* текстурні координати */ 1.0f, 0.0f, // 9
-        /* координати */ 0.9f, 0.4f,   /* текстурні координати */ 1.0f, 1.0f, // 10
-        /* координати */ 0.4f, 0.4f,  /* текстурні координати */ 0.0f, 1.0f, // 11
+        /* координати */ -0.5f, -0.5f, /* текстурні координати */ 0.0f, 0.0f, // 0
+        /* координати */ 0.5f, -0.5f,  /* текстурні координати */ 1.0f, 0.0f, // 1
+        /* координати */ 0.5f, 0.5f,   /* текстурні координати */ 1.0f, 1.0f, // 2
+        /* координати */ -0.5f, 0.5f,  /* текстурні координати */ 0.0f, 1.0f, // 3
     };
 
-    unsigned int rectIndices[] {
-        // rectangle 1
+    unsigned int squareIndices[] {
         0, 1, 2,
         0, 2, 3,
-
-        // rectangle 2
-        4, 5, 6,
-        4, 6, 7,
-
-        // rectangle 3
-        8, 9, 10,
-        8, 10, 11,
     };
 
     GLuint VBO, rectIndexVBO; // ідентифікатор для даних - місток CPU та GPU
@@ -89,7 +77,7 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectIndexVBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectIndices), rectIndices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // bind = activate
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertices), rectVertices, GL_STATIC_DRAW);
@@ -120,60 +108,92 @@ int main()
     glBindVertexArray(0); // деактивувати VAO
 
     unsigned int texture1 = loadTexture("res/textures/house.jpg");
-    unsigned int texture2 = loadTexture("res/textures/girl.jpg");
-    unsigned int texture3 = loadTexture("res/textures/dog.jpg");
 
+    bool isPaused = false;
+    bool spaceWasPressed = false;
+
+    float angle = 0.0f;
+    float rotationSpeed = glm::radians(90.0f);
+
+    auto previousTime = std::chrono::high_resolution_clock::now();
+
+    const double targetFrameTime = 1.0 / 60.0;
 
     /* Loop until the user closes the window */
     do
     {
+        auto frameStart = std::chrono::high_resolution_clock::now();
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> delta = currentTime - previousTime;
+        previousTime = currentTime;
+
+        float deltaTime = delta.count();
+
+        int spaceState = glfwGetKey(window, GLFW_KEY_SPACE);
+
+        if (spaceState == GLFW_PRESS && !spaceWasPressed) {
+            isPaused = !isPaused;
+            spaceWasPressed = true;
+        }
+
+        if (spaceState == GLFW_RELEASE) {
+            spaceWasPressed = false;
+        }
+
+        if (!isPaused) {
+            angle += rotationSpeed * deltaTime;
+        }
+
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
 
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::rotate(
+            transform,
+            angle,
+            glm::vec3(0.0f, 0.0f, 1.0f)
+            );
+
+        glUniformMatrix4fv(
+            transformUniformPos,
+            1,
+            GL_FALSE,
+            glm::value_ptr(transform)
+            );
+
         glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
         glUniform1i(textureUniformPos, 0);
 
         glBindVertexArray(VAO);
 
-        // rect 1 with texture 1
-        glBindTexture(GL_TEXTURE_2D, texture1);
         glDrawElements(
-            GL_TRIANGLES,
-            6,
-            GL_UNSIGNED_INT,
-            0
-            );
-
-        // rect 2 with texture 2
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glDrawElements(GL_TRIANGLES,
-            6,
-            GL_UNSIGNED_INT,
-            (void*)(6 * sizeof(unsigned int))
-            );
-
-        // rect 3 with texture 3
-        glBindTexture(GL_TEXTURE_2D, texture3);
-        glDrawElements(GL_TRIANGLES,
-            6,
-            GL_UNSIGNED_INT,
-            (void*)(12 * sizeof(unsigned int))
-            );
+            GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
         /* Poll for and process events */
         glfwPollEvents();
-    } while (!glfwWindowShouldClose(window) && !glfwGetKey(window, GLFW_KEY_ESCAPE));
+
+        auto frameEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> frameDuration = frameEnd - frameStart;
+
+        double sleepTime = targetFrameTime - frameDuration.count();
+
+        if (sleepTime > 0.0) {
+            std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
+        }
+
+    } while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS);
 
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &rectIndexVBO);
     glDeleteVertexArrays(1, &VAO);
     glDeleteProgram(shaderProgram);
     glDeleteTextures(1, &texture1);
-    glDeleteTextures(1, &texture2);
 
     glfwTerminate();
     return 0;
