@@ -6,6 +6,10 @@
 
 #include "../utils/shader_utils.h"
 #include "../utils/texture.h"
+#include "glm/common.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.inl"
 
 
 int main()
@@ -37,6 +41,7 @@ int main()
         return -1;
     }
 
+    glfwSwapInterval(1); // синхронізує рендер цикл із частотою екрана
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -51,6 +56,8 @@ int main()
     GLint texture0_loc = glGetUniformLocation(shaderProgram, "uTexture0");
     GLint texture1_loc = glGetUniformLocation(shaderProgram, "uTexture1");
     GLint texture2_loc = glGetUniformLocation(shaderProgram, "uTexture2");
+    GLint t_loc = glGetUniformLocation(shaderProgram, "uT");
+    GLint transform_loc = glGetUniformLocation(shaderProgram, "uTransformation");
 
     float vertices[] = {
         /* координати */  -0.5f, -0.5f,  /* тестурні координати */  0.0f, 0.0f,  //  0
@@ -108,7 +115,13 @@ int main()
     unsigned int texture2 = loadTexture("res/textures/2.jpeg");
 
     float t = 0.0f;
-    float deltaTime = 0.01f;
+    float deltaTime = 1.0f / 60.0f;
+
+    auto transformation = glm::mat4(1.0f);
+
+    // transformation = glm::translate(transformation, glm::vec3(1.0f, 0.0f, 0.0f));
+    // transformation = glm::rotate(transformation, glm::radians(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+    // transformation = glm::scale(transformation, glm::vec3(2.0f, 2.0f, 2.0f));
 
     /* Loop until the user closes the window */
     do
@@ -122,6 +135,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
 
+        glUniform1f(t_loc, t);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture0);
         glUniform1i(texture0_loc, 0);
@@ -134,6 +149,9 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
         glUniform1i(texture2_loc, 2);
 
+        transformation = glm::rotate(transformation, glm::radians(1.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(transform_loc, 1, GL_FALSE, glm::value_ptr(transformation));
+        
         glBindVertexArray(VAO);
 
         // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -150,6 +168,8 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteProgram(shaderProgram);
     glDeleteTextures(1, &texture0);
+    glDeleteTextures(1, &texture1);
+    glDeleteTextures(1, &texture2);
 
     glfwTerminate();
     return 0;
