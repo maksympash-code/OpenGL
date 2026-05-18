@@ -158,3 +158,28 @@ add_custom_command( # Копіює ресурси з папки src/lesson_02/re
         ${CMAKE_SOURCE_DIR}/${LESSON_DIR}/res
         $<TARGET_FILE_DIR:${LESSON_TARGET}>/res
 )
+
+######### LESSON_7 #########
+set(LESSON_TARGET lesson07)
+set(LESSON_DIR src/${LESSON_TARGET})
+
+FILE(GLOB_RECURSE LESSON_SRC
+        ${LESSON_DIR}/*.cpp
+        ${LESSON_DIR}/*.h
+)
+#MESSAGE("====" ${LESSON_SRC})
+
+add_executable(${LESSON_TARGET}
+        ${LESSON_SRC}
+        ${UTILS_DIR}
+)
+
+target_link_libraries(${LESSON_TARGET} ${libs})
+target_include_directories(${LESSON_TARGET} PRIVATE ${UTILS_DIR})
+
+add_custom_command( # Копіює ресурси з папки src/lesson_02/res у build директорію
+        TARGET ${LESSON_TARGET} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/${LESSON_DIR}/res
+        $<TARGET_FILE_DIR:${LESSON_TARGET}>/res
+)
