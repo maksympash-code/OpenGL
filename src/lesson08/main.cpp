@@ -107,9 +107,17 @@ int main()
     unsigned int texture1 = loadTexture("res/textures/1.jpeg");
     unsigned int texture2 = loadTexture("res/textures/2.jpeg");
 
+    float t = 0.0f;
+    float deltaTime = 0.01f;
+
     /* Loop until the user closes the window */
     do
     {
+        t += deltaTime;
+        if (t >= 1.0f || t <= 0.0f) {
+            deltaTime = -deltaTime;
+        }
+
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
